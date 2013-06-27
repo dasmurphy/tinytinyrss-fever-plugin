@@ -30,6 +30,10 @@ Full Support
 
 * Reeder - iPhone
 
+Limited support
+
+* Mr.Reader - iPad - can currently only load and show items, can **not** read/star items
+
 ## <a name="installation">Installation</a>
 
 Upload the ```fever``` folder in the ```plugins``` folder of your TinyTinyRSS installation. Enable the plugin in the preferences and set your password for the Fever API.
@@ -45,3 +49,9 @@ Licensed under GNU GPL version 2 (<- I think this is okay for this plugin…)
 v1.0-v1.2 - 2013/5/27 - DigitalDJ version
 
 * see this [thread](http://tt-rss.org/forum/viewtopic.php?f=22&t=1981) in the TinyTinyRSS Forum
+
+v1.3 - 2013/6/27
+
+* fixed several bugs in json output from the plugin
+* added a small fix for Mr.Reader 2.0 so it can complete loading of all items
+* added first Mr.Reader compatiblity without marking items read/starred

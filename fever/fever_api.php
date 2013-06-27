@@ -1,27 +1,32 @@
 <?php
+
 class FeverAPI extends Handler {
 
 	const API_LEVEL  = 3;
 
 	const STATUS_OK  = 1;
 	const STATUS_ERR = 0;
-	
+
+	// debugging only function with JSON
+	const DEBUG = 0; // enable if you need some debug output in your tinytinyrss root
+	const DEBUG_USER = 1; // your user id you need to debug - look it up in your mysql database
+
 	private $xml;
-	
+
 	// always include api_version, status as 'auth'
 	// output json/xml
-	function wrap($status, $reply) 
+	function wrap($status, $reply)
 	{
 		$arr = array("api_version" => self::API_LEVEL,
 					 "auth" => $status);
-					 
+
 		if ($status == self::STATUS_OK)
 		{
+			$arr["last_refreshed_on_time"] = $this->lastRefreshedOnTime()."";
 			if (!empty($reply) && is_array($reply))
 				$arr = array_merge($arr, $reply);
-			$arr["last_refreshed_on_time"] = $this->lastRefreshedOnTime();
 		}
-		
+
 		if ($this->xml)
 		{
 			print $this->array_to_xml($arr);
@@ -29,16 +34,20 @@ class FeverAPI extends Handler {
 		else
 		{
 			print json_encode($arr);
-		}		
+			if (DEBUG==1) {
+				// debug output
+				file_put_contents('./debug_fever.txt','answer   : '.json_encode($arr)."\n",FILE_APPEND);
+			}
+		}
 	}
-	
+
 	// fever supports xml wrapped in <response> tags
 	private function array_to_xml($array, $container = 'response', $is_root = true)
 	{
 		if (!is_array($array)) return array_to_xml(array($array));
-		
+
 		$xml = '';
-		
+
 		if ($is_root)
 		{
 			$xml .= '<?xml version="1.0" encoding="utf-8"?>';
@@ -49,14 +58,14 @@ class FeverAPI extends Handler {
 		{
 			// make sure key is a string
 			$elem = $key;
-			
+
 			if (!is_string($key) && !empty($container))
 			{
 				$elem = $container;
 			}
-			
+
 			$xml .= "<{$elem}>";
-			
+
 			if (is_array($value))
 			{
 				if (array_keys($value) !== array_keys(array_keys($value)))
@@ -72,18 +81,18 @@ class FeverAPI extends Handler {
 			{
 				$xml .= (htmlspecialchars($value, ENT_COMPAT, 'ISO-8859-1') != $value) ? "<![CDATA[{$value}]]>" : $value;
 			}
-			
+
 			$xml .= "</{$elem}>";
 		}
-		
+
 		if ($is_root)
 		{
 			$xml .= "</{$container}>";
 		}
-		
+
 		return preg_replace('/[\x00-\x1F\x7F]/', '', $xml);
 	}
-	
+
 	// every authenticated method includes last_refreshed_on_time
 	private function lastRefreshedOnTime()
 	{
@@ -91,19 +100,19 @@ class FeverAPI extends Handler {
 									 FROM ttrss_feeds
 									 WHERE owner_uid = " . $_SESSION["uid"] . "
 									 ORDER BY last_updated DESC");
-									 
-		if ($this->dbh->num_rows($result) > 0) 
+
+		if ($this->dbh->num_rows($result) > 0)
 		{
 			$last_refreshed_on_time = strtotime($this->dbh->fetch_result($result, 0, "last_updated"));
-		} 
-		else 
+		}
+		else
 		{
 			$last_refreshed_on_time = 0;
 		}
-		
+
 		return $last_refreshed_on_time;
 	}
-	
+
 	// find the user in the db with a particular api key
 	private function setUser()
 	{
@@ -112,14 +121,18 @@ class FeverAPI extends Handler {
 			$result = $this->dbh->query("SELECT	owner_uid
 										 FROM ttrss_plugin_storage
 										 WHERE content = '" . db_escape_string('a:1:{s:8:"password";s:32:"') . db_escape_string(strtolower($_REQUEST["api_key"])) . db_escape_string('";}') . "'");
-						
-			if ($this->dbh->num_rows($result) > 0) 
+
+			if ($this->dbh->num_rows($result) > 0)
 			{
 				$_SESSION["uid"] = $this->dbh->fetch_result($result, 0, "owner_uid");
-			} 
+			}
+
+			if (DEBUG==1) {
+				$_SESSION["uid"] = DEBUG_USER; // always authenticate and set debug user
+			}
 		}
 	}
-	
+
 	// set whether xml or json
 	private function setXml()
 	{
@@ -130,31 +143,31 @@ class FeverAPI extends Handler {
 				$this->xml = true;
 		}
 	}
-	
+
 	private function flattenGroups(&$groupsToGroups, &$groups, &$groupsToTitle, $index)
 	{
 		foreach ($groupsToGroups[$index] as $item)
 		{
 		    $id = substr($item, strpos($item, "-") + 1);
-			array_push($groups, array("id" => $id, "title" => $groupsToTitle[$id]));
+			array_push($groups, array("id" => intval($id), "title" => $groupsToTitle[$id]));
 			if (isset($groupsToGroups[$id]))
 				$this->flattenGroups($groupsToGroups, $groups, $groupsToTitle, $id);
 		}
 	}
-	
+
 	function getGroups()
 	{
 		// TODO: ordering of child categories etc
 		$groups = array();
-		
+
 		$result = $this->dbh->query("SELECT	id, title, parent_cat
 							 FROM ttrss_feed_categories
 							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'
 							 ORDER BY order_id ASC");
-							 
+
 		$groupsToGroups = array();
 		$groupsToTitle = array();
-		
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			if ($line["parent_cat"] === NULL)
@@ -163,7 +176,7 @@ class FeverAPI extends Handler {
 				{
 					$groupsToGroups[-1] = array();
 				}
-				
+
 				array_push($groupsToGroups[-1], $line["order_id"] . "-" . $line["id"]);
 			}
 			else
@@ -172,84 +185,84 @@ class FeverAPI extends Handler {
 				{
 					$groupsToGroups[$line["parent_cat"]] = array();
 				}
-			
+
 				array_push($groupsToGroups[$line["parent_cat"]], $line["order_id"] . "-" . $line["id"]);
 			}
-			
+
 			$groupsToTitle[$line["id"]] = $line["title"];
 		}
-		
+
 		foreach ($groupsToGroups as $key => $value)
 		{
 			sort($value);
 		}
-		
+
 		if (isset($groupsToGroups[-1]))
 			$this->flattenGroups($groupsToGroups, $groups, $groupsToTitle, -1);
-		
+
 		return $groups;
 	}
-	
+
 	function getFeeds()
 	{
 		$feeds = array();
-		
+
 		$result = $this->dbh->query("SELECT	id, title, feed_url, site_url, last_updated
 							 FROM ttrss_feeds
 							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'
 							 ORDER BY order_id ASC");
-			
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			array_push($feeds, array("id" => $line["id"],
-									 "favicon_id" => $line["id"],
+			array_push($feeds, array("id" => intval($line["id"]),
+									 "favicon_id" => intval($line["id"]),
 									 "title" => $line["title"],
 									 "url" => $line["feed_url"],
 									 "site_url" => $line["site_url"],
 									 "is_spark" => 0, // unsported
 									 "last_updated_on_time" => strtotime($line["last_updated"])
 					));
-		} 
+		}
 		return $feeds;
 	}
-	
+
 	function getFavicons()
 	{
 		$favicons = array();
-		
+
 		$result = $this->dbh->query("SELECT	id
 							 FROM ttrss_feeds
 							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'
 							 ORDER BY order_id ASC");
-			
+
 		// data = "image/gif;base64,<base64 encoded image>
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			$filename = "feed-icons/" . $line["id"] . ".ico";
 			if (file_exists($filename))
 			{
-				array_push($favicons, array("id" => $line["id"],
+				array_push($favicons, array("id" => intval($line["id"]),
 											"data" => image_type_to_mime_type(exif_imagetype($filename)) . ";base64," . base64_encode(file_get_contents($filename))
 						  ));
 			}
-		} 
-		
+		}
+
 		return $favicons;
 	}
-	
+
 	function getLinks()
 	{
 		// TODO: is there a 'hot links' alternative in ttrss?
 		$links = array();
-			
+
 		return $links;
 	}
-	
+
 	function getItems()
-	{	
+	{
 		// items from specific groups, feeds
 		$items = array();
-		
+
 		$item_limit = 50;
 		$where = " owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND ref_id = id ";
 
@@ -280,16 +293,16 @@ class FeverAPI extends Handler {
 				$feeds_in_group_result = $this->dbh->query("SELECT id
 															FROM ttrss_feeds
 															WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' " . $groups_query);
-				
+
 				$group_feed_ids = array();
 				while ($line = $this->dbh->fetch_assoc($feeds_in_group_result))
 				{
 					array_push($group_feed_ids, $line["id"]);
 				}
-				
+
 				$feed_ids = array_unique(array_merge($feed_ids, $group_feed_ids));
 			}
-			
+
 			$query = " feed_id IN (";
 			$num_feed_ids = sizeof($feed_ids);
 			foreach ($feed_ids as $feed_id)
@@ -299,16 +312,16 @@ class FeverAPI extends Handler {
 				else
 					$num_feed_ids--;
 			}
-			
+
 			if ($num_feed_ids <= 0)
 				$query = " feed_id IN ('') ";
 			else
 				$query = trim($query, ",") . ")";
-				
+
 			if (!empty($where)) $where .= " AND ";
 			$where .= $query;
 		}
-		
+
 		if (isset($_REQUEST["max_id"])) // descending from most recently added
 		{
 			// use the max_id argument to request the previous $item_limit items
@@ -324,14 +337,14 @@ class FeverAPI extends Handler {
 				{
 					$where .= "1";
 				}
-				
+
 				$where .= " ORDER BY id DESC";
 			}
 		}
 		else if (isset($_REQUEST["with_ids"])) // selective
 		{
 			if (!empty($where)) $where .= " AND "; // group_ids & feed_ids don't make sense with this query but just in case
-			
+
 			$item_ids = explode(",", $_REQUEST["with_ids"]);
 			$query = "id IN (";
 			$num_ids = sizeof($item_ids);
@@ -342,12 +355,12 @@ class FeverAPI extends Handler {
 				else
 					$num_ids--;
 			}
-			
+
 			if ($num_ids <= 0)
 				$query = "id IN ('') ";
 			else
 				$query = trim($query, ",") . ") ";
-			
+
 			$where .= $query;
 		}
 		else // ascending from first added
@@ -360,7 +373,8 @@ class FeverAPI extends Handler {
 				if ($since_id)
 				{
 					if (!empty($where)) $where .= " AND ";
-					$where .= "id > " . db_escape_string($since_id) . " ";
+					//$where .= "id > " . db_escape_string($since_id) . " ";
+					$where .= "id > " . db_escape_string($since_id*1000) . " "; // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
 				}
 				else if (empty($where))
 				{
@@ -370,116 +384,116 @@ class FeverAPI extends Handler {
 				$where .= " ORDER BY id ASC";
 			}
 		}
-		
+
 		$where .= " LIMIT " . $item_limit;
-		
-		// id, feed_id, title, author, html, url, is_saved, is_read, created_on_time	
-		$result = $this->dbh->query("SELECT ref_id, feed_id, title, link, content, id, marked, unread, author, date_entered
+
+		// id, feed_id, title, author, html, url, is_saved, is_read, created_on_time
+		$result = $this->dbh->query("SELECT ref_id, feed_id, title, link, content, id, marked, unread, author, updated
 									 FROM ttrss_entries, ttrss_user_entries
 									 WHERE " . $where);
-			
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			array_push($items, array("id" => $line["id"],
-									 "feed_id" => $line["feed_id"],
+			array_push($items, array("id" => intval($line["id"]),
+									 "feed_id" => intval($line["feed_id"]),
 									 "title" => $line["title"],
 									 "author" => $line["author"],
 									 "html" => $line["content"],
 									 "url" => $line["link"],
 									 "is_saved" => (sql_bool_to_bool($line["marked"]) ? 1 : 0),
 									 "is_read" => ( (!sql_bool_to_bool($line["unread"])) ? 1 : 0),
-									 "created_on_time" => strtotime($line["date_entered"])
+									 "created_on_time" => strtotime($line["updated"])
 					));
 		}
-			
+
 		return $items;
 	}
-	
+
 	function getTotalItems()
-	{	
+	{
 		// number of total items
 		$total_items = 0;
-		
+
 		$where = " owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'";
 		$result = $this->dbh->query("SELECT COUNT(ref_id) as total_items
 									 FROM ttrss_user_entries
 									 WHERE " . $where);
-			
-		if ($this->dbh->num_rows($result) > 0) 
+
+		if ($this->dbh->num_rows($result) > 0)
 		{
 			$total_items = $this->dbh->fetch_result($result, 0, "total_items");
-		} 
+		}
 
 		return $total_items;
 	}
-	
+
 	function getFeedsGroup()
 	{
 		$feeds_groups = array();
-	
+
 		$result = $this->dbh->query("SELECT	id, cat_id
 							 FROM ttrss_feeds
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' 
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'
 							 AND cat_id IS NOT NULL
 							 ORDER BY id ASC");
-							
+
 		$groupsToFeeds = array();
-		
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			if (!array_key_exists($line["cat_id"], $groupsToFeeds))
 				$groupsToFeeds[$line["cat_id"]] = array();
-			
+
 			array_push($groupsToFeeds[$line["cat_id"]], $line["id"]);
 		}
-		
+
 		foreach ($groupsToFeeds as $group => $feeds)
 		{
 			$feedsStr = "";
 			foreach ($feeds as $feed)
 				$feedsStr .= $feed . ",";
 			$feedsStr = trim($feedsStr, ",");
-			
+
 			array_push($feeds_groups, array("group_id" => $group,
 											"feed_ids" => $feedsStr));
 		}
 		return $feeds_groups;
 	}
-	
+
 	function getUnreadItemIds()
 	{
 		$unreadItemIdsCSV = "";
 		$result = $this->dbh->query("SELECT	ref_id, unread
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'");
-		
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'"); // ORDER BY red_id DESC
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			if (sql_bool_to_bool($line["unread"]))
 				$unreadItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$unreadItemIdsCSV = trim($unreadItemIdsCSV, ",");
-		
+
 		return $unreadItemIdsCSV;
 	}
-	
+
 	function getSavedItemIds()
 	{
 		$savedItemIdsCSV = "";
 		$result = $this->dbh->query("SELECT	ref_id, marked
 							 FROM ttrss_user_entries
 							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'");
-		
+
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			if (sql_bool_to_bool($line["marked"]))
 				$savedItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$savedItemIdsCSV = trim($savedItemIdsCSV, ",");
-		
+
 		return $savedItemIdsCSV;
 	}
-	
+
 	function setItem($id, $field_raw, $mode, $before = 0)
 	{
 		$field = "";
@@ -505,7 +519,7 @@ class FeverAPI extends Handler {
 				break;
 		}
 
-		if ($field && $set_to) 
+		if ($field && $set_to)
 		{
 			$article_ids = db_escape_string($id);
 
@@ -523,40 +537,40 @@ class FeverAPI extends Handler {
 			}
 		}
 	}
-	
+
 	function setItemAsRead($id)
 	{
 		$this->setItem($id, 1, 0);
 	}
-	
+
 	function setItemAsUnread($id)
 	{
 		$this->setItem($id, 1, 1);
 	}
-	
+
 	function setItemAsSaved($id)
 	{
 		$this->setItem($id, 0, 1);
 	}
-	
+
 	function setItemAsUnsaved($id)
 	{
 		$this->setItem($id, 0, 0);
 	}
-	
+
 	function setFeed($id, $cat, $before=0)
 	{
 		// if before is zero, set it to now so feeds all items are read from before this point in time
 		if ($before == 0)
 			$before = time();
-			
-		if (is_numeric($id)) 
+
+		if (is_numeric($id))
 		{
 			// this is a category
-			if ($cat) 
+			if ($cat)
 			{
 				// if not special feed
-				if ($id > 0) 
+				if ($id > 0)
 				{
 					db_query("UPDATE ttrss_user_entries
 						SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -578,7 +592,7 @@ class FeverAPI extends Handler {
 				}
 			}
 			// not a category
-			else if ($id > 0) 
+			else if ($id > 0)
 			{
 				db_query("UPDATE ttrss_user_entries
 					SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -588,24 +602,24 @@ class FeverAPI extends Handler {
 
 			}
 			ccache_update($id,$_SESSION["uid"], $cat);
-		}	
+		}
 	}
-	
+
 	function setFeedAsRead($id, $before)
 	{
 		$this->setFeed($id, false, $before);
 	}
-	
+
 	function setGroupAsRead($id, $before)
 	{
 		$this->setFeed($id, true, $before);
 	}
-	
+
 	// this does all the processing, since the fever api does not have a specific variable that specifies the operation
-	function index() 
+	function index()
 	{
 		$response_arr = array();
-		
+
 		if (isset($_REQUEST["groups"]))
 		{
 			$response_arr["groups"] = $this->getGroups();
@@ -638,14 +652,14 @@ class FeverAPI extends Handler {
 		{
 			$response_arr["saved_item_ids"] = $this->getSavedItemIds();
 		}
-		
+
 		if (isset($_REQUEST["mark"], $_REQUEST["as"], $_REQUEST["id"]))
 		{
 			if (is_numeric($_REQUEST["id"]))
 			{
 				$before	= (isset($_REQUEST["before"])) ? $_REQUEST["before"] : null;
 				$method_name = "set" . ucfirst($_REQUEST["mark"]) . "As" . ucfirst($_REQUEST["as"]);
-				
+
 				if (method_exists($this, $method_name))
 				{
 					$id = intval($_REQUEST["id"]);
@@ -665,25 +679,29 @@ class FeverAPI extends Handler {
 				}
 			}
 		}
-		
+
 		if ($_SESSION["uid"])
 			$this->wrap(self::STATUS_OK, $response_arr);
 		else if (!$_SESSION["uid"])
 			$this->wrap(self::STATUS_ERR, NULL);
-		
+
 	}
-	
+
 	// validate the api_key, user preferences
 	function before($method) {
 		if (parent::before($method)) {
-		
+			if (DEBUG==1) {
+				// add request to debug log
+				file_put_contents('./debug_fever.txt','parameter: '.json_encode($_REQUEST)."\n",FILE_APPEND);
+			}
+
 			// set the user from the db
 			$this->setUser();
-			
+
 			// are we xml or json?
 			$this->setXml();
-			
-			if ($this->xml)			
+
+			if ($this->xml)
 				header("Content-Type: text/xml");
 			else
 				header("Content-Type: text/json");

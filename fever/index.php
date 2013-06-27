@@ -1,10 +1,11 @@
 <?php
+
 	// do not support refresh command, this could take ages.
 	if (isset($_REQUEST["refresh"]))
 	{
 		exit;
 	}
-	
+
 
 	error_reporting(E_ERROR | E_PARSE);
 
@@ -16,7 +17,7 @@
   		get_include_path());
 
 	chdir("../..");
-	
+
 	define('NO_SESSION_AUTOSTART', true);
 
 	require_once "autoload.php";
@@ -34,17 +35,18 @@
 	} else {
 		ob_start();
 	}
-	
+
 	if (!init_plugins()) return;
 
 	$handler = new FeverAPI(Db::get(), $_REQUEST);
-	
+
 	if ($handler->before($method)) {
 		if (method_exists($handler, 'index')) {
 			$handler->index($method);
 		}
 		$handler->after();
 	}
-	
+
 	ob_end_flush();
+
 ?>

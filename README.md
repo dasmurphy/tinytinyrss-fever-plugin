@@ -56,5 +56,5 @@ v1.0-v1.2 - 2013/5/27 - DigitalDJ version
 v1.3 - 2013/6/27
 
 * fixed several bugs in json output from the plugin
-* added a small fix for Mr.Reader 2.0 so it can complete loading of all items
+* added a small fix for Mr.Reader 2.0 so it can complete loading of all items (see [FAQ](http://www.curioustimes.de/mrreader/faq/))
 * added first Mr.Reader compatiblity without marking items read/starred

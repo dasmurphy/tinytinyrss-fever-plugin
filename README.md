@@ -37,6 +37,8 @@ Limited support
 
 * Mr.Reader - iPad - can currently only load and show items, can **not** read/star items
 
+If you get ```Offline Actions``` then long tap the settings icon and delete the pending actions.
+
 ## <a name="installation">Installation</a>
 
 Upload the ```fever``` folder in the ```plugins``` folder of your TinyTinyRSS installation. Enable the plugin in the preferences and set your password for the Fever API.

@@ -6,7 +6,7 @@ This plugin is an open source module for TinyTinyRSS which simulates the Fever A
 
 - - -
 
-* <a href="#features">Tested Clients</a>
+* <a href="#features">Features</a>
 * <a href="#download">Downloads</a>
 * <a href="#supported">Supported/Tested Clients</a>
 * <a href="#installation">Installation</a>
@@ -23,6 +23,10 @@ Following Features are implemented:
 * setting read marker for item(s)
 * setting starred marker for item(s)
 * hot is **not** supported
+
+## <a name="downloads">Downloads</a>
+
+Please click the ```ZIP``` Button to download current version. ;)
 
 ## <a name="supported">Supported/Tested Clients</a>
 

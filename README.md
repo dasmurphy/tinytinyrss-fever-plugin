@@ -12,7 +12,6 @@ This plugin is an open source module for TinyTinyRSS which simulates the Fever A
 * <a href="#installation">Installation</a>
 * <a href="#license">License</a>
 * <a href="#changelog">Changelog</a>
-* <a href="#copyright">Copyright</a>
 
 ## <a name="features">Features</a>
 

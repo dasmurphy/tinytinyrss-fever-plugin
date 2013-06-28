@@ -10,7 +10,7 @@ class FeverAPI extends Handler {
 	const STATUS_ERR = 0;
 
 	// debugging only functions with JSON
-	const DEBUG = true; // enable if you need some debug output in your tinytinyrss root
+	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
 	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
 	const DEBUG_FILE = './debug_fever.txt'; // the file for debugging output
 

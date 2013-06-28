@@ -47,6 +47,7 @@ In the file ```fever_api.php``` there are two flags for debugging at the beginni
 
 * ```DEBUG``` - set this to true to get a fever_debug.txt file in your root folder of the Tiny Tiny RSS installation.
 * ```DEBUG_USER``` - set this to the id (from ttrss_users) of your user you would like to always authenticate on your Tiny Tiny RSS installation. The authentication process is then skipped and the api gets always authentication.
+* ```DEBUG_FILE``` - set this to a filename that suits you for debugging this plugin if you need to.
 
 ## <a name="license">License</a>
 
@@ -76,7 +77,7 @@ v1.4.1 - 2013/6/28
 
 v1.4.2 - 2013/6/28
 
-* changed the DEBUG_USER evaluation a little bit for disabling authentication without DEBUG = true
+* changed the ```DEBUG_USER``` evaluation a little bit for disabling authentication without DEBUG = true
 
 v1.4.3 - 2013/6/28
 

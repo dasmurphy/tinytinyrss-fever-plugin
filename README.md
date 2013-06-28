@@ -29,15 +29,10 @@ Please click the ```ZIP``` Button to download current version. ;)
 
 ## <a name="supported">Supported/Tested Clients</a>
 
-Full Support
+These clients should be working fine with this API emulation.
 
 * Reeder - iPhone
-
-Limited support
-
-* Mr.Reader - iPad - can currently only load and show items, can **not** read/star items
-
-If you get ```Offline Actions``` then long tap the settings icon and delete the pending actions.
+* Mr.Reader - iPad
 
 ## <a name="installation">Installation</a>
 
@@ -60,3 +55,9 @@ v1.3 - 2013/6/27
 * fixed several bugs in json output from the plugin
 * added a small fix for Mr.Reader 2.0 so it can complete loading of all items (see [FAQ](http://www.curioustimes.de/mrreader/faq/))
 * added first Mr.Reader compatiblity without marking items read/starred
+* changed the field ```date_entered``` to ```updated``` for better reading experience
+
+v1.4 - 2013/6/28
+
+* fixed authentication with Mr.Reader 2.0
+* fixed debugging options

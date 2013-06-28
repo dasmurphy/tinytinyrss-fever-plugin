@@ -7,9 +7,9 @@ class FeverAPI extends Handler {
 	const STATUS_OK  = 1;
 	const STATUS_ERR = 0;
 
-	// debugging only function with JSON
-	const DEBUG = 0; // enable if you need some debug output in your tinytinyrss root
-	const DEBUG_USER = 1; // your user id you need to debug - look it up in your mysql database
+	// debugging only functions with JSON
+	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
+	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
 
 	private $xml;
 
@@ -34,7 +34,7 @@ class FeverAPI extends Handler {
 		else
 		{
 			print json_encode($arr);
-			if (DEBUG==1) {
+			if (self::DEBUG) {
 				// debug output
 				file_put_contents('./debug_fever.txt','answer   : '.json_encode($arr)."\n",FILE_APPEND);
 			}
@@ -116,19 +116,42 @@ class FeverAPI extends Handler {
 	// find the user in the db with a particular api key
 	private function setUser()
 	{
-		if (isset($_REQUEST["api_key"]))
+		$apikey = isset($_REQUEST["api_key"])?$_REQUEST["api_key"]:'';
+		// here comes Mr.Reader special API for logging in
+		if ((strlen($apikey)==0)&&
+			(isset($_REQUEST["action"]))&&
+			($_REQUEST["action"]=='login')&&
+			(isset($_REQUEST["email"]))&&
+			(isset($_REQUEST["password"]))) {
+			$email = $_REQUEST["email"];
+			$password = $_REQUEST["password"];
+			$apikey = md5($email.":".db_escape_string($password));
+			setcookie('fever_auth',$apikey,time()+60*60*24*30);
+			if (self::DEBUG) {
+				// debug output
+				$output = array();
+				$output['email'] = $username;
+				$output['password'] = $password;
+				$output['apikey'] = $apikey;
+				file_put_contents('./debug_fever.txt','auth POST: '.json_encode($output)."\n",FILE_APPEND);
+			}
+		}
+		if ((strlen($apikey)==0)&&isset($_REQUEST['fever_auth'])) { // override for Mr.Reader when doing some stuff
+			$apikey = $_REQUEST['fever_auth'];
+		}
+		if (strlen($apikey)>0)
 		{
 			$result = $this->dbh->query("SELECT	owner_uid
 										 FROM ttrss_plugin_storage
-										 WHERE content = '" . db_escape_string('a:1:{s:8:"password";s:32:"') . db_escape_string(strtolower($_REQUEST["api_key"])) . db_escape_string('";}') . "'");
+										 WHERE content = '" . db_escape_string('a:1:{s:8:"password";s:32:"') . db_escape_string(strtolower($apikey)) . db_escape_string('";}') . "'");
 
 			if ($this->dbh->num_rows($result) > 0)
 			{
 				$_SESSION["uid"] = $this->dbh->fetch_result($result, 0, "owner_uid");
 			}
 
-			if (DEBUG==1) {
-				$_SESSION["uid"] = DEBUG_USER; // always authenticate and set debug user
+			if (self::DEBUG&&self::DEBUG_USER>0) {
+				$_SESSION["uid"] = self::DEBUG_USER; // always authenticate and set debug user
 			}
 		}
 	}
@@ -690,7 +713,7 @@ class FeverAPI extends Handler {
 	// validate the api_key, user preferences
 	function before($method) {
 		if (parent::before($method)) {
-			if (DEBUG==1) {
+			if (self::DEBUG) {
 				// add request to debug log
 				file_put_contents('./debug_fever.txt','parameter: '.json_encode($_REQUEST)."\n",FILE_APPEND);
 			}

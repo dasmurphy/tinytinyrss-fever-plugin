@@ -10,6 +10,7 @@ This plugin is an open source module for TinyTinyRSS which simulates the Fever A
 * <a href="#download">Downloads</a>
 * <a href="#supported">Supported/Tested Clients</a>
 * <a href="#installation">Installation</a>
+* <a href="#debug">Debugging</a>
 * <a href="#license">License</a>
 * <a href="#changelog">Changelog</a>
 
@@ -39,6 +40,13 @@ These clients should be working fine with this API emulation.
 Upload the ```fever``` folder in the ```plugins``` folder of your TinyTinyRSS installation. Enable the plugin in the preferences and set your password for the Fever API.
 
 See [here](http://tt-rss.org/forum/viewtopic.php?f=22&t=1981) for more detailed informations.
+
+## <a name="debug">Debugging</a>
+
+In the file ```fever_api.php``` there are two flags for debugging at the beginning of the file.
+
+* ```DEBUG``` - set this to true to get a fever_debug.txt file in your root folder of the Tiny Tiny RSS installation.
+* ```DEBUG_USER``` - set this to the id (from ttrss_users) of your user you would like to always authenticate on your Tiny Tiny RSS installation. The authentication process is then skipped and the api gets always authentication.
 
 ## <a name="license">License</a>
 

@@ -10,7 +10,7 @@ I’ve created a simple [HTML widget](http://www.feedafever.com/gateway/public/a
 
 Without further ado, the Fever API endpoint URL looks like:
 
-```http://yourdomain.com/fever/?api```
+`http://yourdomain.com/fever/?api`
 
 All requests must be authenticated with a `POST`ed `api_key`. The value of `api_key` should be the md5 checksum of the Fever accounts email address and password concatenated with a colon. An example of a valid value for `api_key` using PHP’s native `md5()` function:
 

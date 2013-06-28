@@ -52,6 +52,8 @@ In the file ```fever_api.php``` there are two flags for debugging at the beginni
 
 ## <a name="error">Error reporting</a>
 
+If you got problems with authentication, try to reenter the password in TinyTinyRSS Fever plugin and save it again.
+
 When you find an error you may post it in the plugin [thread](http://tt-rss.org/forum/viewtopic.php?f=22&t=1981) or here on github.com in the ```Issues``` section.
 
 Please include your debug log which should be cleaned up. Please remove your username, password and apikey before posting it.

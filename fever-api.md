@@ -17,7 +17,8 @@ All requests must be authenticated with a `POST`ed `api_key`. The value of `api_
 ```php
 $email  = 'you@yourdomain.com';
 $pass   = 'b3stp4s4wd3v4';
-$api_key = md5($email.':'.$pass);```
+$api_key = md5($email.':'.$pass);
+```
 
 A user may specify that `https` be used to connect to their Fever installation for additional security but you should not assume that all Fever installations support `https`.
 

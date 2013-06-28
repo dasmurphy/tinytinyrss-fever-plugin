@@ -65,3 +65,7 @@ v1.4 - 2013/6/28
 v1.4.1 - 2013/6/28
 
 * removed password from debug log file
+
+v1.4.2 - 2013/6/28
+
+* changed the DEBUG_USER evaluation a little bit for disabling authentication without DEBUG = true

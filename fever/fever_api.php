@@ -1,6 +1,6 @@
 <?php
 
-// v1.4.1
+// v1.4.2
 
 class FeverAPI extends Handler {
 
@@ -11,7 +11,7 @@ class FeverAPI extends Handler {
 
 	// debugging only functions with JSON
 	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
-	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
+	const DEBUG_USER = 2; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
 
 	private $xml;
 
@@ -152,7 +152,7 @@ class FeverAPI extends Handler {
 				$_SESSION["uid"] = $this->dbh->fetch_result($result, 0, "owner_uid");
 			}
 
-			if (self::DEBUG&&self::DEBUG_USER>0) {
+			if (self::DEBUG_USER>0) {
 				$_SESSION["uid"] = self::DEBUG_USER; // always authenticate and set debug user
 			}
 		}

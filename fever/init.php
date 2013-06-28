@@ -69,7 +69,7 @@ class Fever extends Plugin {
 			$result = db_query("SELECT login FROM ttrss_users WHERE id = '" . db_escape_string($_SESSION["uid"]) . "'");
 			if ($line = db_fetch_assoc($result))
 			{
-				$password = md5($line["login"] . ":" . db_escape_string($_POST["password"]));
+				$password = md5($line["login"] . ":" . $_POST["password"]);
 				$this->host->set($this, "password", $password);
 				echo __("Password saved.");
 			}

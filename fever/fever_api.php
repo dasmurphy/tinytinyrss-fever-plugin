@@ -10,7 +10,7 @@ class FeverAPI extends Handler {
 	const STATUS_ERR = 0;
 
 	// debugging only functions with JSON
-	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
+	const DEBUG = true; // enable if you need some debug output in your tinytinyrss root
 	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
 	const DEBUG_FILE = './debug_fever.txt'; // the file for debugging output
 
@@ -128,7 +128,7 @@ class FeverAPI extends Handler {
 			(isset($_REQUEST["password"]))) {
 			$email = $_REQUEST["email"];
 			$password = $_REQUEST["password"];
-			$apikey = strtoupper(md5($email.":".db_escape_string($password)));
+			$apikey = strtoupper(md5($email.":".$password));
 			setcookie('fever_auth',$apikey,time()+60*60*24*30);
 			if (self::DEBUG) {
 				// debug output
@@ -145,7 +145,7 @@ class FeverAPI extends Handler {
 		{
 			$result = $this->dbh->query("SELECT	owner_uid
 										 FROM ttrss_plugin_storage
-										 WHERE content = '" . db_escape_string('a:1:{s:8:"password";s:32:"') . db_escape_string(strtolower($apikey)) . db_escape_string('";}') . "'");
+										 WHERE content = '".db_escape_string('a:1:{s:8:"password";s:32:"'.strtolower($apikey).'";}') . "'");
 
 			if ($this->dbh->num_rows($result) > 0)
 			{

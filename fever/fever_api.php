@@ -1,6 +1,6 @@
 <?php
 
-// v1.4.2
+// v1.4.3
 
 class FeverAPI extends Handler {
 
@@ -12,6 +12,7 @@ class FeverAPI extends Handler {
 	// debugging only functions with JSON
 	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
 	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
+	const DEBUG_FILE = './debug_fever.txt'; // the file for debugging output
 
 	private $xml;
 
@@ -38,7 +39,7 @@ class FeverAPI extends Handler {
 			print json_encode($arr);
 			if (self::DEBUG) {
 				// debug output
-				file_put_contents('./debug_fever.txt','answer   : '.json_encode($arr)."\n",FILE_APPEND);
+				file_put_contents(self::DEBUG_FILE,'answer   : '.json_encode($arr)."\n",FILE_APPEND);
 			}
 		}
 	}
@@ -127,15 +128,14 @@ class FeverAPI extends Handler {
 			(isset($_REQUEST["password"]))) {
 			$email = $_REQUEST["email"];
 			$password = $_REQUEST["password"];
-			$apikey = md5($email.":".db_escape_string($password));
+			$apikey = strtoupper(md5($email.":".db_escape_string($password)));
 			setcookie('fever_auth',$apikey,time()+60*60*24*30);
 			if (self::DEBUG) {
 				// debug output
 				$output = array();
-				$output['email'] = $username;
-				$output['password'] = '***not displayed***';
+				$output['email'] = $email;
 				$output['apikey'] = $apikey;
-				file_put_contents('./debug_fever.txt','auth POST: '.json_encode($output)."\n",FILE_APPEND);
+				file_put_contents(self::DEBUG_FILE,'auth POST: '.json_encode($output)."\n",FILE_APPEND);
 			}
 		}
 		if ((strlen($apikey)==0)&&isset($_REQUEST['fever_auth'])) { // override for Mr.Reader when doing some stuff
@@ -278,6 +278,7 @@ class FeverAPI extends Handler {
 	function getLinks()
 	{
 		// TODO: is there a 'hot links' alternative in ttrss?
+		// use ttrss_user_entries / score>0
 		$links = array();
 
 		return $links;
@@ -717,7 +718,7 @@ class FeverAPI extends Handler {
 		if (parent::before($method)) {
 			if (self::DEBUG) {
 				// add request to debug log
-				file_put_contents('./debug_fever.txt','parameter: '.json_encode($_REQUEST)."\n",FILE_APPEND);
+				file_put_contents(self::DEBUG_FILE,'parameter: '.json_encode($_REQUEST)."\n",FILE_APPEND);
 			}
 
 			// set the user from the db

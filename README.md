@@ -77,3 +77,9 @@ v1.4.1 - 2013/6/28
 v1.4.2 - 2013/6/28
 
 * changed the DEBUG_USER evaluation a little bit for disabling authentication without DEBUG = true
+
+v1.4.3 - 2013/6/28
+
+* added ```DEBUG_FILE``` to debug configuration
+* changed authentication call from Mr.Reader so that the reply is also uppercase, since the API-KEY comes in uppercase from clients
+* fixed debug output while authentication in Mr.Reader with displaying the email adress

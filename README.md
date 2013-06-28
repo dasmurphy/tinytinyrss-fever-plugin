@@ -61,3 +61,7 @@ v1.4 - 2013/6/28
 
 * fixed authentication with Mr.Reader 2.0
 * fixed debugging options
+
+v1.4.1 - 2013/6/28
+
+* removed password from debug log file

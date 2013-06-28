@@ -131,7 +131,7 @@ class FeverAPI extends Handler {
 				// debug output
 				$output = array();
 				$output['email'] = $username;
-				$output['password'] = $password;
+				$output['password'] = '***not displayed***';
 				$output['apikey'] = $apikey;
 				file_put_contents('./debug_fever.txt','auth POST: '.json_encode($output)."\n",FILE_APPEND);
 			}

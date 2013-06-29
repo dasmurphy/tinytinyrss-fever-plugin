@@ -9,14 +9,15 @@
 
 	error_reporting(E_ERROR | E_PARSE);
 
-	require_once "../../config.php";
+	$tt_root = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))).'/';
+	require_once $tt_root."config.php";
 
 	set_include_path(dirname(__FILE__) . PATH_SEPARATOR .
-		dirname(dirname(dirname(__FILE__))) . PATH_SEPARATOR .
-		dirname(dirname(dirname(__FILE__))) . "/include" . PATH_SEPARATOR .
+		$tt_root . PATH_SEPARATOR .
+		$tt_root . "/include" . PATH_SEPARATOR .
   		get_include_path());
 
-	chdir("../..");
+	chdir($tt_root);
 
 	define('NO_SESSION_AUTOSTART', true);
 

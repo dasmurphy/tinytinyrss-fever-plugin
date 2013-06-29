@@ -6,15 +6,21 @@
 		exit;
 	}
 
-
 	error_reporting(E_ERROR | E_PARSE);
 
-	$tt_root = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))).'/';
-	require_once $tt_root."config.php";
+	$tt_root = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+	$tt_root2 = $tt_root;
+	if (file_exists($tt_root."/config.php")) {
+		require_once $tt_root."/config.php";
+	} else { //if (file_exists("../../config.php")) {
+		$tt_root = "../..";
+		$tt_root2 = dirname(dirname(dirname(__FILE__)));
+		require_once $tt_root."/config.php";
+	}
 
 	set_include_path(dirname(__FILE__) . PATH_SEPARATOR .
-		$tt_root . PATH_SEPARATOR .
-		$tt_root . "/include" . PATH_SEPARATOR .
+		$tt_root2 . PATH_SEPARATOR .
+		$tt_root2 . "/include" . PATH_SEPARATOR .
   		get_include_path());
 
 	chdir($tt_root);

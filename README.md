@@ -33,8 +33,9 @@ Please click the [```Download ZIP```](https://github.com/dasmurphy/tinytinyrss-f
 
 These clients should be working fine with this API emulation.
 
-* Reeder - iPhone
-* Mr.Reader - iPad
+* [Reeder](http://reederapp.com) - iPhone
+* [Mr.Reader](http://www.curioustimes.de/mrreader/index.html) - iPad
+* [ReadKit](http://readkitapp.com) - OS X
 
 ## <a name="installation">Installation</a>
 

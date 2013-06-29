@@ -98,7 +98,3 @@ v1.4.4 - 2013/6/28
 
 * updated the documentation
 * changed some in saving the generated API-KEY - now its generated like in the Fever API documentation
-
-v1.4.5 - 2013/6/29
-
-* fixed the cannot mark/star bug

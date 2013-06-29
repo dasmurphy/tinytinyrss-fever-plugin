@@ -27,7 +27,7 @@ Following Features are implemented:
 
 ## <a name="downloads">Downloads</a>
 
-Please click the ```ZIP``` Button to download current version. ;)
+Please click the [```Download ZIP```](https://github.com/dasmurphy/tinytinyrss-fever-plugin/archive/master.zip) button to download current version. ;)
 
 ## <a name="supported">Supported/Tested Clients</a>
 
@@ -54,7 +54,7 @@ In the file ```fever_api.php``` there are two flags for debugging at the beginni
 
 If you got problems with authentication after updating the plugin, try to reenter the password in TinyTinyRSS Fever plugin and save it again.
 
-When you find an error you may post it in the plugin [thread](http://tt-rss.org/forum/viewtopic.php?f=22&t=1981) or here on github.com in the ```Issues``` section.
+When you find an error you may post it in the plugin [thread](http://tt-rss.org/forum/viewtopic.php?f=22&t=1981) or here on github.com in the [Issues](https://github.com/dasmurphy/tinytinyrss-fever-plugin/issues/) section.
 
 Please include your debug log which should be cleaned up. Please remove your username, password and apikey before posting it.
 

@@ -36,8 +36,12 @@ These clients should be working fine with this API emulation.
 * [Reeder](http://reederapp.com) - iPhone
 * [Mr.Reader](http://www.curioustimes.de/mrreader/index.html) - iPad
 * [ReadKit](http://readkitapp.com) - OS X
+* [Meltdown](https://github.com/phubbard/Meltdown) - Android
+  * displays feeds as 'orphan' items, but runs fine
 
 ## <a name="installation">Installation</a>
+
+**IMPORTENT** Enable external API access in your TinyTinyRSS installation! Otherwise this will not work!
 
 Upload the ```fever``` folder in the ```plugins``` folder of your TinyTinyRSS installation. Enable the plugin in the preferences and set your password for the Fever API.
 

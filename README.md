@@ -101,4 +101,4 @@ v1.4.4 - 2013/6/28
 
 v1.4.5 - 2013/6/29
 
-* fixed the cannot mark/star bug
+* fixed the cannot mark/star bug in Mr.Reader

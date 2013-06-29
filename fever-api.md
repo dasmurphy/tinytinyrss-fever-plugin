@@ -1,6 +1,12 @@
 # API Public Beta 
 
-**Information** Currently it is a copy of [http://www.feedafever.com/api](http://www.feedafever.com/api), but as a Markdown File.
+## Information
+
+Currently it is a copy of [http://www.feedafever.com/api](http://www.feedafever.com/api), but as a Markdown File.
+
+At the end of this document there is some undocumented stuff from the API.
+
+## Description
 
 Fever 1.14 introduces the new Fever API. This API is in public beta and currently supports basic syncing and consuming of content. A subsequent update will allow for adding, editing and deleting feeds and groups. The API’s primary focus is maintaining a local cache of the data in a remote Fever installation.
 
@@ -225,7 +231,7 @@ Similarly you can mark just the “Sparks” super group as read by adding the f
 * `id=-1`
 * `before=?` where `?` is replaced with the Unix timestamp of the the local client’s last `items` API request
 
-# inoffical API
+# inoffical/undocumented API
 
 This is the extension which represents some things which will be used from Mr.Reader App in iPad and are not documented as normal API, but allows it because the Fever API point is the same as the webpage requests.
 

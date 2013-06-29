@@ -1,6 +1,6 @@
 # TinyTinyRSS Fever API plugin
 
-See also [Fever API](blob/master/fever-api.md)
+See also [Fever API](fever-api.md)
 
 ## Description
 

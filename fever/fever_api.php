@@ -138,8 +138,8 @@ class FeverAPI extends Handler {
 				file_put_contents(self::DEBUG_FILE,'auth POST: '.json_encode($output)."\n",FILE_APPEND);
 			}
 		}
-		if ((strlen($apikey)==0)&&isset($_REQUEST['fever_auth'])) { // override for Mr.Reader when doing some stuff
-			$apikey = $_REQUEST['fever_auth'];
+		if ((strlen($apikey)==0)&&isset($_COOKIE['fever_auth'])) { // override for Mr.Reader when doing some stuff
+			$apikey = $_COOKIE['fever_auth'];
 		}
 		if (strlen($apikey)>0)
 		{

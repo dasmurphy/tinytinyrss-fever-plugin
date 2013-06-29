@@ -730,7 +730,7 @@ class FeverAPI extends Handler {
 			if ($this->xml)
 				header("Content-Type: text/xml");
 			else
-				header("Content-Type: text/json");
+				header("Content-Type: application/json");
 
 			// check we have a valid user
 			if (!$_SESSION["uid"]) {

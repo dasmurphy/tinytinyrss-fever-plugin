@@ -602,7 +602,7 @@ class FeverAPI extends Handler {
 		$unreadItemIdsCSV = "";
 		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'" . "AND unread"); // ORDER BY red_id DESC
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND unread"); // ORDER BY red_id DESC
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
@@ -618,7 +618,7 @@ class FeverAPI extends Handler {
 		$savedItemIdsCSV = "";
 		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'" . "AND marked OR published OR feed_id IS NULL OR uuid != ''");
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND marked");
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{

@@ -830,7 +830,8 @@ class FeverAPI extends Handler {
 
 
 		if ( strlen(strstr($_SERVER['HTTP_USER_AGENT'],"Dalvik")) <= 0 && 
-		      strlen(strstr($_SERVER['HTTP_USER_AGENT'],"ReadKit")) <= 0
+		      strlen(strstr($_SERVER['HTTP_USER_AGENT'],"ReadKit")) <= 0 &&
+		      strlen(strstr($_SERVER['HTTP_USER_AGENT'],"Mr. Reader")) <= 0
 		    ) { //Chech for Press client in Android, ReadKit in Mac
 			$this->IS_PRESS = 0;
 		} else {

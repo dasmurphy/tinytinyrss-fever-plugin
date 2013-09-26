@@ -793,7 +793,7 @@ class FeverAPI extends Handler {
 			if (is_numeric($_REQUEST["id"]))
 			{
 				$before	= (isset($_REQUEST["before"])) ? $_REQUEST["before"] : null;
-				if ($this->IS_PRESS && $before > 0) {
+				if ($before > pow(10,10) ) {
 					$before = round($before / 1000);
 				}
 				$method_name = "set" . ucfirst($_REQUEST["mark"]) . "As" . ucfirst($_REQUEST["as"]);

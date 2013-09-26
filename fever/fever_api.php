@@ -600,14 +600,13 @@ class FeverAPI extends Handler {
 	function getUnreadItemIds()
 	{
 		$unreadItemIdsCSV = "";
-		$result = $this->dbh->query("SELECT	ref_id, unread
+		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'"); // ORDER BY red_id DESC
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'" . "AND unread"); // ORDER BY red_id DESC
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			if (sql_bool_to_bool($line["unread"]))
-				$unreadItemIdsCSV .= $line["ref_id"] . ",";
+			$unreadItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$unreadItemIdsCSV = trim($unreadItemIdsCSV, ",");
 
@@ -617,14 +616,13 @@ class FeverAPI extends Handler {
 	function getSavedItemIds()
 	{
 		$savedItemIdsCSV = "";
-		$result = $this->dbh->query("SELECT	ref_id, marked
+		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'");
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'" . "AND marked OR published OR feed_id IS NULL OR uuid != ''");
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			if (sql_bool_to_bool($line["marked"]))
-				$savedItemIdsCSV .= $line["ref_id"] . ",";
+			$savedItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$savedItemIdsCSV = trim($savedItemIdsCSV, ",");
 

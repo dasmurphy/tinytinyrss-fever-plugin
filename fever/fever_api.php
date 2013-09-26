@@ -827,17 +827,14 @@ class FeverAPI extends Handler {
 
 	// validate the api_key, user preferences
 	function before($method) {
-
-
-		if ( strlen(strstr($_SERVER['HTTP_USER_AGENT'],"Dalvik")) <= 0 && 
-		      strlen(strstr($_SERVER['HTTP_USER_AGENT'],"ReadKit")) <= 0 &&
-		      strlen(strstr($_SERVER['HTTP_USER_AGENT'],"Mr. Reader")) <= 0
-		    ) { //Chech for Press client in Android, ReadKit in Mac
-			$this->IS_PRESS = 0;
-		} else {
+		if ( strpos($_SERVER['HTTP_USER_AGENT'],"Dalvik") !== false || 
+		      strpos($_SERVER['HTTP_USER_AGENT'],"ReadKit") !== false ||
+		      strpos($_SERVER['HTTP_USER_AGENT'],"Mr. Reader")  !== false
+		    ) { //Check for Press client in Android, ReadKit in Mac, Mr. Reader
 			$this->IS_PRESS = 1;
+		} else {
+			$this->IS_PRESS = 0;
 		}
-
 		if (parent::before($method)) {
 			if (self::DEBUG) {
 				// add request to debug log

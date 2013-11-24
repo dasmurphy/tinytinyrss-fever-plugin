@@ -54,7 +54,7 @@ class Fever extends Plugin {
 		print "<button dojoType=\"dijit.form.Button\" type=\"submit\">" . __("Set Password") . "</button>";
 		print "</form>";
 
-		print "<p>" . __("To login with the Fever API, set your server details in your favourite RSS application to: ") . ($_SERVER["HTTPS"] == "on" ? "https://" : "http://") . dirname($_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"]) . "/plugins/fever/" . "</p>";
+		print "<p>" . __("To login with the Fever API, set your server details in your favourite RSS application to: ") . get_self_url_prefix() . "/plugins/fever/" . "</p>";
 		print "<p>" . __("Additional details can be found at ") . "<a href=\"http://www.feedafever.com/api\" target=\"_blank\">http://www.feedafever.com/api</a></p>";
 
 		print "<p>" . __("Note: Due to the limitations of the API and some RSS clients (for example, Reeder on iOS), some features are unavailable: \"Special\" Feeds (Published / Tags / Labels / Fresh / Recent), Nested Categories (hierarchy is flattened)") . "</p>";

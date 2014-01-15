@@ -29,7 +29,7 @@ Following Features are implemented:
 
 ## <a name="downloads">Downloads</a>
 
-Please click the [```Download ZIP```](https://github.com/dasmurphy/tinytinyrss-fever-plugin/archive/master.zip) button to download current version. ;)
+Please click on [```releases```](https://github.com/dasmurphy/tinytinyrss-fever-plugin/releases) button to download the latest stable version. Or click the [```Download ZIP```](https://github.com/dasmurphy/tinytinyrss-fever-plugin/archive/master.zip) button to download the edge version. ;)
 
 ## <a name="supported">Supported/Tested Clients</a>
 

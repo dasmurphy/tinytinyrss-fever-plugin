@@ -15,7 +15,7 @@ class FeverAPI extends Handler {
 	const DEBUG_FILE = './debug_fever.txt'; // the file for debugging output
 	const ADD_ATTACHED_FILES = 1; //add link in bottom for attached files
 
-	private $IS_PRESS = 0;
+	private $ID_HACK_FOR_MRREADER = 0;
 
 	private $xml;
 
@@ -176,7 +176,7 @@ class FeverAPI extends Handler {
 	{
 		foreach ($groupsToGroups[$index] as $item)
 		{
-		    $id = substr($item, strpos($item, "-") + 1);
+			$id = substr($item, strpos($item, "-") + 1);
 			array_push($groups, array("id" => intval($id), "title" => $groupsToTitle[$id]));
 			if (isset($groupsToGroups[$id]))
 				$this->flattenGroups($groupsToGroups, $groups, $groupsToTitle, $id);
@@ -271,7 +271,7 @@ class FeverAPI extends Handler {
 			{
 				array_push($favicons, array("id" => intval($line["id"]),
 											"data" => image_type_to_mime_type(exif_imagetype($filename)) . ";base64," . base64_encode(file_get_contents($filename))
-						  ));
+				));
 			}
 		}
 
@@ -532,10 +532,10 @@ class FeverAPI extends Handler {
 				if ($since_id)
 				{
 					if (!empty($where)) $where .= " AND ";
-					if ($this->IS_PRESS) {
-						$where .= "id > " . db_escape_string($since_id) . " ";
+					if ($this->ID_HACK_FOR_MRREADER) {
+						$where .= "id > " . db_escape_string($since_id*1000) . " "; // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
 					} else {
-						$where .= "id > " . db_escape_string($since_id*1000) . " ";  // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
+						$where .= "id > " . db_escape_string($since_id) . " ";
 					}
 				}
 				else if (empty($where))
@@ -873,13 +873,13 @@ class FeverAPI extends Handler {
 
 	// validate the api_key, user preferences
 	function before($method) {
-		if ( strpos($_SERVER['HTTP_USER_AGENT'],"Dalvik") !== false ||
-		      strpos($_SERVER['HTTP_USER_AGENT'],"ReadKit") !== false ||
-		      strpos($_SERVER['HTTP_USER_AGENT'],"Mr. Reader")  !== false
-		    ) { //Check for Press client in Android, ReadKit in Mac, Mr. Reader
-			$this->IS_PRESS = 1;
+		// Check for all client in Android except ReadKit in Mac, Mr. Reader and Dalvik
+		if (strpos($_SERVER['HTTP_USER_AGENT'],"Dalvik") !== false ||
+			strpos($_SERVER['HTTP_USER_AGENT'],"ReadKit") !== false ||
+			strpos($_SERVER['HTTP_USER_AGENT'],"Mr. Reader") !== false) {
+			$this->ID_HACK_FOR_MRREADER = 0;
 		} else {
-			$this->IS_PRESS = 0;
+			$this->ID_HACK_FOR_MRREADER = 1; // and readkit and dalvik...
 		}
 		if (parent::before($method)) {
 			if (self::DEBUG) {

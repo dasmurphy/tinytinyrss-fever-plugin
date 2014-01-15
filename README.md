@@ -38,6 +38,7 @@ These clients should be working fine with this API emulation.
 * [Reeder](http://reederapp.com) - iPhone
 * [Mr.Reader](http://www.curioustimes.de/mrreader/index.html) - iPad
 * [ReadKit](http://readkitapp.com) - OS X
+* [Press](https://play.google.com/store/apps/details?id=com.twentyfivesquares.press) - Android
 * [Meltdown](https://github.com/phubbard/Meltdown) - Android
   * displays feeds as 'orphan' items, but runs fine
 

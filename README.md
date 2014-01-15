@@ -114,3 +114,6 @@ v1.4.6 - 2014/1/15
 
 * merged bigger pull request to get more Fever API RSS Readers to work
 
+v1.4.7 - 2014/1/15
+
+* added rewrite url function to module, since it was removed from tinytinyrss

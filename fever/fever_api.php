@@ -1,6 +1,6 @@
 <?php
 
-// v1.4.6
+// v1.4.7
 
 class FeverAPI extends Handler {
 

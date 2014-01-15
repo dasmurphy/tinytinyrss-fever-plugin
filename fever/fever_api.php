@@ -287,11 +287,57 @@ class FeverAPI extends Handler {
 		return $links;
 	}
 
+	function rewrite_urls($html) {
+		libxml_use_internal_errors(true);
+
+		$charset_hack = '<head>
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		</head>';
+
+		$doc = new DOMDocument();
+		$doc->loadHTML($charset_hack . $html);
+		$xpath = new DOMXPath($doc);
+
+		$entries = $xpath->query('//*/text()');
+
+		foreach ($entries as $entry) {
+			if (strstr($entry->wholeText, "://") !== false) {
+				$text = preg_replace("/((?<!=.)((http|https|ftp)+):\/\/[^ ,!]+)/i",
+					"<a target=\"_blank\" href=\"\\1\">\\1</a>", $entry->wholeText);
+
+				if ($text != $entry->wholeText) {
+					$cdoc = new DOMDocument();
+					$cdoc->loadHTML($charset_hack . $text);
+
+
+					foreach ($cdoc->childNodes as $cnode) {
+						$cnode = $doc->importNode($cnode, true);
+
+						if ($cnode) {
+							$entry->parentNode->insertBefore($cnode);
+						}
+					}
+
+					$entry->parentNode->removeChild($entry);
+
+				}
+			}
+		}
+
+		$node = $doc->getElementsByTagName('body')->item(0);
+
+		// http://tt-rss.org/forum/viewtopic.php?f=1&t=970
+		if ($node)
+			return $doc->saveXML($node);
+		else
+			return $html;
+	}
+
 	function my_sanitize($str, $site_url = false) {
 		$res = trim($str); if (!$res) return '';
 
 		if (strpos($res, "href=") === false)
-			$res = rewrite_urls($res);
+			$res = $this->rewrite_urls($res);
 
 		$charset_hack = '<head>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -328,7 +374,7 @@ class FeverAPI extends Handler {
 
 		$entries = $xpath->query('//iframe');
 		foreach ($entries as $entry) {
-			$entry->setAttribute('sandbox', 'allow-scripts');
+			$entry->setAttribute('sandbox', 'allow-scripts allow-same-origin');
 		}
 
 		$disallowed_attributes = array('id', 'style', 'class');

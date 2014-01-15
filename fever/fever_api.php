@@ -13,6 +13,9 @@ class FeverAPI extends Handler {
 	const DEBUG = false; // enable if you need some debug output in your tinytinyrss root
 	const DEBUG_USER = 0; // your user id you need to debug - look it up in your mysql database and set it to a value bigger than 0
 	const DEBUG_FILE = './debug_fever.txt'; // the file for debugging output
+	const ADD_ATTACHED_FILES = 1; //add link in bottom for attached files
+
+	private $IS_PRESS = 0;
 
 	private $xml;
 
@@ -284,6 +287,90 @@ class FeverAPI extends Handler {
 		return $links;
 	}
 
+	function my_sanitize($str, $site_url = false) {
+		$res = trim($str); if (!$res) return '';
+
+		if (strpos($res, "href=") === false)
+			$res = rewrite_urls($res);
+
+		$charset_hack = '<head>
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		</head>';
+
+		$res = trim($res); if (!$res) return '';
+
+		libxml_use_internal_errors(true);
+
+		$doc = new DOMDocument();
+		$doc->loadHTML($charset_hack . $res);
+		$xpath = new DOMXPath($doc);
+
+		$entries = $xpath->query('(//a[@href]|//img[@src])');
+
+		foreach ($entries as $entry) {
+
+			if ($site_url) {
+
+				if ($entry->hasAttribute('href'))
+					$entry->setAttribute('href',
+						rewrite_relative_url($site_url, $entry->getAttribute('href')));
+
+				if ($entry->hasAttribute('src')) {
+					$src = rewrite_relative_url($site_url, $entry->getAttribute('src'));
+					$entry->setAttribute('src', $src);
+				}
+			}
+
+			if (strtolower($entry->nodeName) == "a") {
+				$entry->setAttribute("target", "_blank");
+			}
+		}
+
+		$entries = $xpath->query('//iframe');
+		foreach ($entries as $entry) {
+			$entry->setAttribute('sandbox', 'allow-scripts');
+		}
+
+		$disallowed_attributes = array('id', 'style', 'class');
+
+		$entries = $xpath->query('//*');
+		foreach ($entries as $entry) {
+			if ($entry->hasAttributes()) {
+				$attrs_to_remove = array();
+				foreach ($entry->attributes as $attr) {
+					if (strpos($attr->nodeName, 'on') === 0) { //remove onclick and other on* attributes
+						array_push($attrs_to_remove, $attr);
+					}
+
+					if (in_array($attr->nodeName, $disallowed_attributes)) {
+						array_push($attrs_to_remove, $attr);
+					}
+				}
+				foreach ($attrs_to_remove as $attr) {
+					$entry->removeAttributeNode($attr);
+				}
+			}
+		}
+
+		$doc->removeChild($doc->firstChild); //remove doctype
+		$res = $doc->saveHTML();
+		return $res;
+	}
+
+	function formatBytes($bytes, $precision = 2) {
+		$units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+		$bytes = max($bytes, 0);
+		$pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+		$pow = min($pow, count($units) - 1);
+
+		// Uncomment one of the following alternatives
+		$bytes /= pow(1024, $pow);
+		// $bytes /= (1 << (10 * $pow));
+
+		return round($bytes, $precision) . ' ' . $units[$pow];
+	}
+
 	function getItems()
 	{
 		// items from specific groups, feeds
@@ -316,9 +403,9 @@ class FeverAPI extends Handler {
 				else
 					$groups_query = trim($groups_query, ",") . ")";
 
-				$feeds_in_group_result = $this->dbh->query("SELECT id
-															FROM ttrss_feeds
-															WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' " . $groups_query);
+				$feeds_in_group_result = $this->dbh->query("SELECT id".
+															"FROM ttrss_feeds".
+															"WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' " . $groups_query);
 
 				$group_feed_ids = array();
 				while ($line = $this->dbh->fetch_assoc($feeds_in_group_result))
@@ -399,8 +486,11 @@ class FeverAPI extends Handler {
 				if ($since_id)
 				{
 					if (!empty($where)) $where .= " AND ";
-					//$where .= "id > " . db_escape_string($since_id) . " ";
-					$where .= "id > " . db_escape_string($since_id*1000) . " "; // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
+					if ($this->IS_PRESS) {
+						$where .= "id > " . db_escape_string($since_id) . " ";
+					} else {
+						$where .= "id > " . db_escape_string($since_id*1000) . " ";  // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
+					}
 				}
 				else if (empty($where))
 				{
@@ -420,11 +510,32 @@ class FeverAPI extends Handler {
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
+			$line_content = $this->my_sanitize($line["content"], $line["link"]);
+			if (ADD_ATTACHED_FILES){
+				$enclosures = get_article_enclosures($line["id"]);
+				if (count($enclosures) > 0) {
+					$line_content .= '<ul type="lower-greek">';
+					foreach ($enclosures as $enclosure) {
+						if (!empty($enclosure['content_url'])) {
+							$enc_type = '';
+							if (!empty($enclosure['content_type'])) {
+								$enc_type = ', '.$enclosure['content_type'];
+							}
+							$enc_size = '';
+							if (!empty($enclosure['duration'])) {
+								$enc_size = ' , '.$this->formatBytes($enclosure['duration']);
+							}
+							$line_content .= '<li><a href="'.$enclosure['content_url'].'" target="_blank">'.basename($enclosure['content_url']).$enc_type.$enc_size.'</a>'.'</li>';
+						}
+					}
+					$line_content .= '</ul>';
+				}
+			}
 			array_push($items, array("id" => intval($line["id"]),
 									 "feed_id" => intval($line["feed_id"]),
 									 "title" => $line["title"],
 									 "author" => $line["author"],
-									 "html" => $line["content"],
+									 "html" => $line_content,
 									 "url" => $line["link"],
 									 "is_saved" => (sql_bool_to_bool($line["marked"]) ? 1 : 0),
 									 "is_read" => ( (!sql_bool_to_bool($line["unread"])) ? 1 : 0),
@@ -489,14 +600,13 @@ class FeverAPI extends Handler {
 	function getUnreadItemIds()
 	{
 		$unreadItemIdsCSV = "";
-		$result = $this->dbh->query("SELECT	ref_id, unread
+		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'"); // ORDER BY red_id DESC
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND unread"); // ORDER BY red_id DESC
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			if (sql_bool_to_bool($line["unread"]))
-				$unreadItemIdsCSV .= $line["ref_id"] . ",";
+			$unreadItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$unreadItemIdsCSV = trim($unreadItemIdsCSV, ",");
 
@@ -506,14 +616,13 @@ class FeverAPI extends Handler {
 	function getSavedItemIds()
 	{
 		$savedItemIdsCSV = "";
-		$result = $this->dbh->query("SELECT	ref_id, marked
+		$result = $this->dbh->query("SELECT	ref_id
 							 FROM ttrss_user_entries
-							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "'");
+							 WHERE owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND marked");
 
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
-			if (sql_bool_to_bool($line["marked"]))
-				$savedItemIdsCSV .= $line["ref_id"] . ",";
+			$savedItemIdsCSV .= $line["ref_id"] . ",";
 		}
 		$savedItemIdsCSV = trim($savedItemIdsCSV, ",");
 
@@ -684,6 +793,9 @@ class FeverAPI extends Handler {
 			if (is_numeric($_REQUEST["id"]))
 			{
 				$before	= (isset($_REQUEST["before"])) ? $_REQUEST["before"] : null;
+				if ($before > pow(10,10) ) {
+					$before = round($before / 1000);
+				}
 				$method_name = "set" . ucfirst($_REQUEST["mark"]) . "As" . ucfirst($_REQUEST["as"]);
 
 				if (method_exists($this, $method_name))
@@ -715,6 +827,14 @@ class FeverAPI extends Handler {
 
 	// validate the api_key, user preferences
 	function before($method) {
+		if ( strpos($_SERVER['HTTP_USER_AGENT'],"Dalvik") !== false ||
+		      strpos($_SERVER['HTTP_USER_AGENT'],"ReadKit") !== false ||
+		      strpos($_SERVER['HTTP_USER_AGENT'],"Mr. Reader")  !== false
+		    ) { //Check for Press client in Android, ReadKit in Mac, Mr. Reader
+			$this->IS_PRESS = 1;
+		} else {
+			$this->IS_PRESS = 0;
+		}
 		if (parent::before($method)) {
 			if (self::DEBUG) {
 				// add request to debug log

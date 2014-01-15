@@ -109,3 +109,8 @@ v1.4.4 - 2013/6/28
 v1.4.5 - 2013/6/29
 
 * fixed the cannot mark/star bug in Mr.Reader
+
+v1.4.6 - 2014/1/15
+
+* merged bigger pull request to get more Fever API RSS Readers to work
+

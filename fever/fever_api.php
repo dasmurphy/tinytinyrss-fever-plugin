@@ -399,8 +399,14 @@ class FeverAPI extends Handler {
 				if ($since_id)
 				{
 					if (!empty($where)) $where .= " AND ";
-					//$where .= "id > " . db_escape_string($since_id) . " ";
-					$where .= "id > " . db_escape_string($since_id*1000) . " "; // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
+					if(strpos($_SERVER['HTTP_USER_AGENT'], 'Mr. Reader') !== false)
+					{
+						$where .= "id > " . db_escape_string($since_id*1000) . " "; // NASTY hack for Mr. Reader 2.0 on iOS and TinyTiny RSS Fever
+					}
+					else
+					{
+						$where .= "id > " . db_escape_string($since_id) . " ";
+					}
 				}
 				else if (empty($where))
 				{

@@ -713,7 +713,7 @@ class FeverAPI extends Handler {
 					WHERE ref_id IN ($article_ids)");
 
 				while ($line = $this->dbh->fetch_assoc($result)) {
-					ccache_update($line["feed_id"], $_SESSION["uid"]);
+					CCache::update($line["feed_id"], $_SESSION["uid"]);
 				}
 			}
 		}
@@ -782,7 +782,7 @@ class FeverAPI extends Handler {
 								AND owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND unread = true AND feed_id = " . intval($id) . " AND date_entered < '" . date("Y-m-d H:i:s", $before) . "' ) as tmp)");
 
 			}
-			ccache_update($id,$_SESSION["uid"], $cat);
+			CCache::update($id,$_SESSION["uid"], $cat);
 		}
 	}
 

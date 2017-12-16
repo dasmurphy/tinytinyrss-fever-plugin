@@ -557,8 +557,8 @@ class FeverAPI extends Handler {
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			$line_content = $this->my_sanitize($line["content"], $line["link"]);
-			if (ADD_ATTACHED_FILES){
-				$enclosures = get_article_enclosures($line["id"]);
+			if (self::ADD_ATTACHED_FILES){
+				$enclosures = Article::get_article_enclosures($line["id"]);
 				if (count($enclosures) > 0) {
 					$line_content .= '<ul type="lower-greek">';
 					foreach ($enclosures as $enclosure) {
@@ -913,6 +913,10 @@ class FeverAPI extends Handler {
 			return true;
 		}
 		return false;
+	}
+
+	public function __construct($dbh, $request) {
+		$this->dbh = $dbh;
 	}
 }
 

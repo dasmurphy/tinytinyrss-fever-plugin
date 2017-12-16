@@ -557,8 +557,8 @@ class FeverAPI extends Handler {
 		while ($line = $this->dbh->fetch_assoc($result))
 		{
 			$line_content = $this->my_sanitize($line["content"], $line["link"]);
-			if (ADD_ATTACHED_FILES){
-				$enclosures = get_article_enclosures($line["id"]);
+			if (self::ADD_ATTACHED_FILES){
+				$enclosures = Article::get_article_enclosures($line["id"]);
 				if (count($enclosures) > 0) {
 					$line_content .= '<ul type="lower-greek">';
 					foreach ($enclosures as $enclosure) {
@@ -713,7 +713,7 @@ class FeverAPI extends Handler {
 					WHERE ref_id IN ($article_ids)");
 
 				while ($line = $this->dbh->fetch_assoc($result)) {
-					ccache_update($line["feed_id"], $_SESSION["uid"]);
+					CCache::ccache_update($line["feed_id"], $_SESSION["uid"]);
 				}
 			}
 		}
@@ -782,7 +782,7 @@ class FeverAPI extends Handler {
 								AND owner_uid = '" . db_escape_string($_SESSION["uid"]) . "' AND unread = true AND feed_id = " . intval($id) . " AND date_entered < '" . date("Y-m-d H:i:s", $before) . "' ) as tmp)");
 
 			}
-			ccache_update($id,$_SESSION["uid"], $cat);
+			CCache::ccache_update($id,$_SESSION["uid"], $cat);
 		}
 	}
 
@@ -913,6 +913,10 @@ class FeverAPI extends Handler {
 			return true;
 		}
 		return false;
+	}
+
+	public function __construct($dbh, $request) {
+		$this->dbh = $dbh;
 	}
 }
 

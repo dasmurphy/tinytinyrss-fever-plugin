@@ -19,6 +19,13 @@ class FeverAPI extends Handler {
 
 	private $xml;
 
+	private $dbh;
+
+	function __construct()
+	{
+		$this->dbh = Db::get();
+	}
+
 	// always include api_version, status as 'auth'
 	// output json/xml
 	function wrap($status, $reply)

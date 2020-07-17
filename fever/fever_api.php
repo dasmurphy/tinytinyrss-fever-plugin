@@ -607,7 +607,7 @@ class FeverAPI extends Handler {
 			$total_items = $this->dbh->fetch_result($result, 0, "total_items");
 		}
 
-		return $total_items;
+		return (int) $total_items;
 	}
 
 	function getFeedsGroup()
